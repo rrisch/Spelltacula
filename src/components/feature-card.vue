@@ -1,0 +1,27 @@
+<script setup lang="ts">
+import  featureCardModel from '../models/feature.ts'
+const props = defineProps({
+  feature: { type: featureCardModel, required: true }
+})
+
+
+</script>
+
+<template>
+  <div class="card bg-base-100 w-96 shadow-sm px-4">
+    <figure>
+
+    </figure>
+    <div class="card-body">
+      <h2 class="card-title">{{ feature.title }}</h2>
+      <p>{{feature.description}}</p>
+      <div class="card-actions justify-end">
+        <button class="btn btn-primary">{{feature.actionText}}</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+
+</style>
