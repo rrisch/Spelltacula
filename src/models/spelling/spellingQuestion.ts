@@ -1,6 +1,6 @@
 import type {iTestQuestion} from "../../interfaces/itest-question.ts";
 import { questionType} from "../../constants/test-question-type.ts";
-
+import {textToSpeechUtil} from "../../classes/text-to-speech-util.ts";
 
 export class spellingQuestion implements iTestQuestion{
     key: string="";
@@ -12,7 +12,7 @@ export class spellingQuestion implements iTestQuestion{
         this.description = description;
     }
 
-    speakWord():void{
-
+    speakWord(window:Window):void{
+        textToSpeechUtil.speak(window,this.key);
     }
 }

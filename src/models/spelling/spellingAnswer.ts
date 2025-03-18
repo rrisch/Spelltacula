@@ -1,22 +1,21 @@
 import type {iTestAnswer} from "../../interfaces/itest-answer.ts";
+import type {iTestQuestion} from "../../interfaces/itest-question.ts";
 
 export class spellingAnswer implements iTestAnswer{
-    description:string ="";
-    correctAnswer:string ="";
+    question:iTestQuestion;
     answer:string ="";
 
-    constructor(description:string, correctAnswer:string) {
-        this.description = description;
-        this.correctAnswer = correctAnswer;
+    constructor(testQuestion:iTestQuestion) {
+        this.question = testQuestion;
     }
 
-    setAnswer(answer:string):void {
-        this.answer = answer.trim();
+    setAnswer(answerValue:string):void {
+        this.answer = answerValue.trim();
     }
 
-    isCorrect(isStrict:boolean):boolean {
-        if (isStrict) return this.correctAnswer === this.answer;
+    isCorrect(isStrict?:boolean):boolean {
+        if (isStrict) return this.question.key === this.answer;
 
-        return this.correctAnswer.toLowerCase() === this.answer.toLowerCase();
+        return this.question.key.toLowerCase() === this.answer.toLowerCase();
     }
 }
