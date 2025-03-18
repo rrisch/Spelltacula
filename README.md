@@ -1,5 +1,13 @@
-# Vue 3 + TypeScript + Vite
+# Spelltacula
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## The most spectacular way for my kids to practice their spelling words
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+This is just a fun project for me to try out some new frameworks and keep my skill sharp while also trying to find new ways to make my kids study.  This is a simple web app that utilizes the built-in `SpeechSynthesis` technology in browsers to audiblly speak words to the user as a study aid / practice exam tool.
+
+This project utilizes the following
+- Vue 3 / Typescript / Vite
+- Vue Router
+- Tailwind CSS / daisyUI
+- Vue FontAwesome icons
+
+
