@@ -1,7 +1,5 @@
 import {expect, test} from 'vitest'
-import {spellingAnswer} from "../spellingAnswer";
 import {testUtilities} from "../../../classes/test-util.ts";
-import {spellingQuestion} from "../spellingQuestion.ts";
 import {spellingTestUtilities} from "./spelling-test-utilities.cs.ts";
 
 test('Can create a new spelling answer', () => {
