@@ -26,7 +26,8 @@ export class spellingTest implements iTest {
     }
 
     gradeTest(): number {
-        return (this.testItems.filter((i: iTestAnswer) => i.isCorrect()).length / this.testItems.length) * 100;
+        this.score =(this.testItems.filter((i: iTestAnswer) => i.isCorrect()).length / this.testItems.length) * 100;
+        return this.score;
     }
 
     startTest(): void {

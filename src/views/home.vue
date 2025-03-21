@@ -1,13 +1,11 @@
 
 <script setup lang="ts">
 // TypeScript enabled
-import  featureCardModel from "../models/feature.ts";
+import {features} from "../constants/current-features.ts"
 import FeatureCard from "../components/feature-card.vue";
 
-const features: featureCardModel[] =[
-    new featureCardModel("Create Spelling Test","Create new spelling tests to practice your spelling words","","Create Tests"),
-  new featureCardModel("Create Spelling Test","Create new spelling tests to practice your spelling words","","Create Tests"),
-];
+
+
 </script>
 
 
