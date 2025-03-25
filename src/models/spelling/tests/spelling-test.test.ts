@@ -1,6 +1,6 @@
 import {expect, test} from 'vitest'
 import {spellingQuestion} from "../spellingQuestion.ts";
-import {testUtilities} from "../../../classes/test-util.ts";
+import {testUtilities} from "../../../classes/test-classes/test-util.ts";
 import {spellingTest} from "../spelling-test.ts";
 import {spellingTestUtilities} from "./spelling-test-utilities.cs.ts";
 

@@ -1,6 +1,6 @@
 import {expect, test} from 'vitest'
 import {spellingQuestion} from "../spellingQuestion.ts";
-import {testUtilities} from "../../../classes/test-util.ts";
+import {testUtilities} from "../../../classes/test-classes/test-util.ts";
 
 test('Can create a new spelling question', () => {
     let questionAnswer = testUtilities.createRandomText(5);
