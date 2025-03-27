@@ -26,8 +26,8 @@ function loadTestTemplates(): TestTemplate[] {
         test.questions.push(new spellingQuestion(`key ${x}`, `Description ${x}`));
       }
     } else {
-      for (var x = 0; x < 10; x++) {
-        test.questions.push(new spellingQuestion(`key ${x}`, `Description ${x}`));
+      for (var y = 0; y < 10; y++) {
+        test.questions.push(new spellingQuestion(`key ${y}`, `Description ${y}`));
       }
     }
     tests.push(test);

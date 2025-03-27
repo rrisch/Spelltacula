@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {TestTemplate} from "../../models/test-template.ts";
-import {type PropType, ref, watch} from "vue";
+import {type PropType, ref } from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 
