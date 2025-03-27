@@ -1,4 +1,4 @@
-import {expect, test} from 'vitest'
+import {expect, test, vi} from 'vitest'
 import {spellingQuestion} from "../spellingQuestion.ts";
 import {testUtilities} from "../../../classes/test-util.ts";
 import {spellingTest} from "../spelling-test.ts";
@@ -29,20 +29,19 @@ test('Can start and stop the test', () => {
     let sut = spellingTestUtilities.generateSpellingTest(10);
     let startDate;
     let endDate;
+vi.useFakeTimers();
 
     sut.startTest();
     startDate = sut.startDate;
-    console.log(startDate);
 
-    for (let i = 0; i < 105; i++) {
-    }
+    setInterval(() => {
+        sut.endTest();
+    }, 10000)
+    vi.advanceTimersByTime(10000);
 
-    sut.endTest();
     endDate = sut.endDate;
-    console.log(endDate);
     expect(startDate).not.toEqual(endDate);
-
-
+    vi.useRealTimers();
 })
 
 test('Can get the next question', () => {
