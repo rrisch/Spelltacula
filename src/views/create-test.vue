@@ -15,18 +15,18 @@ onMounted(() => {
 function loadTestTemplates(): TestTemplate[] {
   //fake data until I can pull latest with localstorage provider
   let tests = [];
-  for (var i = 0; i < 10; i++) {
+  for (let i = 0; i < 10; i++) {
     let test = new TestTemplate();
     test.title = `Test ${i + 1}`;
     test.description = `Description ${i + 1}`;
     test.isCaseSensitive = i % 2 == 0;
 
     if (test.isCaseSensitive) {
-      for (var x = 0; x < 20; x++) {
+      for (let x = 0; x < 20; x++) {
         test.questions.push(new spellingQuestion(`key ${x}`, `Description ${x}`));
       }
     } else {
-      for (var y = 0; y < 10; y++) {
+      for (let y = 0; y < 10; y++) {
         test.questions.push(new spellingQuestion(`key ${y}`, `Description ${y}`));
       }
     }

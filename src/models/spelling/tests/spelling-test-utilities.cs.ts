@@ -1,7 +1,8 @@
-import {testUtilities} from "../../../classes/test-util.ts";
+import {testUtilities} from "../../../classes/test-classes/test-util.ts";
 import {spellingQuestion} from "../spellingQuestion.ts";
 import {spellingAnswer} from "../spellingAnswer.ts";
 import {spellingTest} from "../spelling-test.ts";
+import {classHelpers} from "../../../classes/class-helper.ts";
 
 export class spellingTestUtilities {
     public static createSpellingQuestion(question?: string): spellingQuestion {
@@ -17,7 +18,7 @@ export class spellingTestUtilities {
     }
 
     public static createDefinedSpellingTest(questions: string[], answers: string[]): spellingTest {
-        let test: spellingTest = new spellingTest(testUtilities.generateUUID());
+        let test: spellingTest = new spellingTest(classHelpers.generateUUID());
 
         if (questions == null) throw new RangeError("No questions specified");
         if (answers == null || answers.length != questions.length) throw new RangeError("No answers specified or number of answers do not match number of questions");
@@ -32,7 +33,7 @@ export class spellingTestUtilities {
     }
 
     public static generateSpellingTest(numberOfQuestions?: number): spellingTest {
-        let test: spellingTest = new spellingTest(testUtilities.generateUUID());
+        let test: spellingTest = new spellingTest(classHelpers.generateUUID());
 
         for (let i = 0; i < (numberOfQuestions ? numberOfQuestions : 5); i++) {
             test.testItems.push(new spellingAnswer(new spellingQuestion(testUtilities.createRandomText(5), "")));

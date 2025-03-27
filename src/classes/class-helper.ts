@@ -1,16 +1,4 @@
-export class testUtilities {
-    public static createRandomText(length: number) {
-        let result = "";
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const charactersLength = characters.length;
-        let counter = 0;
-        while (counter < length) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-            counter += 1;
-        }
-        return result;
-    }
-
+export class classHelpers {
     public static generateUUID(): string { // Public Domain/MIT
         var d = new Date().getTime();//Timestamp
         var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
@@ -26,5 +14,5 @@ export class testUtilities {
             return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
         });
     }
-
 }
+s
