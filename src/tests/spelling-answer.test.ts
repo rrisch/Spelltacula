@@ -1,6 +1,8 @@
+// noinspection SpellCheckingInspection
+
 import {expect, test} from 'vitest'
-import {testUtilities} from "../../../classes/test-classes/test-util.ts";
-import {spellingTestUtilities} from "./spelling-test-utilities.cs.ts";
+import {testUtilities} from "../classes/test-classes/test-util.ts";
+import {spellingTestUtilities} from "./spelling-test-utilities.ts";
 
 test('Can create a new spelling answer', () => {
     let testAnswer = spellingTestUtilities.createSpellingAnswer();

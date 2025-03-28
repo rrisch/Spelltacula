@@ -1,30 +1,31 @@
+<!--suppress JSUnusedGlobalSymbols -->
 <script setup lang="ts">
 
-import {TestTemplate} from "../../models/test-template.ts";
-import {type PropType, ref } from "vue";
+import testTemplate from "../../models/templates/test-template";
+import {type PropType, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 
-const currentItem = ref<TestTemplate | undefined>(undefined);
+const currentItem = ref<testTemplate | undefined>(undefined);
 
 
 const props = defineProps({
-  tests: {type: Array as PropType<TestTemplate[]>, required: true}
+  tests: {type: Array as PropType<testTemplate[]>, required: true}
 });
 
 
-function onHover(show: bool, test: TestTemplate): void {
+function onHover(show: bool, test: testTemplate): void {
   if (!test) return;
 
   show == true ? currentItem.value = test : currentItem.value = undefined;
 
 }
 
-function onTemplateClick(template: TestTemplate): void {
+function onTemplateClick(template: testTemplate): void {
   console.log(template);
 }
 
-function onTemplateEditClick(template: TestTemplate): void {
+function onTemplateEditClick(template: testTemplate): void {
   console.log(`Edit ${template.title}`);
 }
 </script>

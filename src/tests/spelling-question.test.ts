@@ -1,7 +1,7 @@
 import {expect, test, vi,} from 'vitest'
-import {spellingQuestion} from "../spellingQuestion.ts";
-import {testUtilities} from "../../../classes/test-util.ts";
-import {mockSpeechSynthesisUtterance, textToSpeechUtil} from "../../../classes/text-to-speech-util.ts";
+import {spellingQuestion} from "../models/spelling/spellingQuestion.ts";
+import {testUtilities} from "../classes/test-classes/test-util.ts";
+import {mockSpeechSynthesisUtterance, textToSpeechUtil} from "../classes/text-to-speech-util.ts";
 
 //mocks a window object that DOES NOT have the speechSynthesis functionality available
 function setUpMockIncompatibleWindow() {

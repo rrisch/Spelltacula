@@ -1,11 +1,15 @@
+// noinspection SpellCheckingInspection
+
 import {expect, test, vi} from 'vitest'
-import {spellingQuestion} from "../spellingQuestion.ts";
-import {testUtilities} from "../../../classes/test-classes/test-util.ts";
-import {spellingTest} from "../spelling-test.ts";
-import {spellingTestUtilities} from "./spelling-test-utilities.cs.ts";
+import {spellingTest} from "../models/spelling/spelling-test";
+import {spellingQuestion} from "../models/spelling/spellingQuestion";
+import {classHelpers} from "../classes/class-helper";
+import {testUtilities} from "../classes/test-classes/test-util";
+import {spellingTestUtilities} from "./spelling-test-utilities.ts";
+
 
 test('Can create a new spelling test', () => {
-    let sut = new spellingTest(testUtilities.generateUUID());
+    let sut = new spellingTest(classHelpers.generateUUID());
 
     expect(sut).not.toBeNull();
     expect(sut.id).not.toEqual("");
@@ -13,7 +17,7 @@ test('Can create a new spelling test', () => {
 })
 
 test('Can populate a spelling test', () => {
-    let sut = new spellingTest(testUtilities.generateUUID());
+    let sut = new spellingTest(classHelpers.generateUUID());
     let questions: spellingQuestion[] = [];
 
     for (let i = 0; i < 5; i++) {
@@ -29,7 +33,7 @@ test('Can start and stop the test', () => {
     let sut = spellingTestUtilities.generateSpellingTest(10);
     let startDate;
     let endDate;
-vi.useFakeTimers();
+    vi.useFakeTimers();
 
     sut.startTest();
     startDate = sut.startDate;

@@ -1,5 +1,6 @@
 import testTemplate from "../models/templates/test-template.ts"
 import {browserStorageKeys} from "../constants/browser-storage-keys.ts";
+import {safeJsonParse} from "./safeJSONParser.ts";
 
 export class TestTemplateStorageUtility {
 
@@ -12,13 +13,14 @@ export class TestTemplateStorageUtility {
 
         if (!templates) return [];
 
-        return JSON.parse(templates);
+        let result = safeJsonParse<testTemplate[]>(templates);
+        return result ? result : [];
     }
 
     private static setTestTemplates(testTemplates: testTemplate[], storageProvider?: Storage): boolean {
-        (storageProvider ? storageProvider.persistance : localStorage).setItem(browserStorageKeys.templateKey, JSON.stringify(testTemplates));
+        (storageProvider ? storageProvider : localStorage).setItem(browserStorageKeys.templateKey, JSON.stringify(testTemplates));
 
-        return this.getTestTemplates(storageProvider) === testTemplates;
+        return this.getTestTemplates(storageProvider).length == testTemplates.length;
     }
 
     public static insertTestTemplate(template: testTemplate, storageObj?: Storage): testTemplate | undefined {
@@ -32,12 +34,9 @@ export class TestTemplateStorageUtility {
     }
 
     public static updateTestTemplate(template: testTemplate, storageObj?: Storage): testTemplate | undefined {
-        let existingTemplate = this.findTestTemplate(template.id, storageObj);
-
-        if (existingTemplate) return undefined;
-
         const currentTemplates: testTemplate[] = this.getTestTemplates(storageObj);
-        const index = existingTemplate ? currentTemplates.indexOf(existingTemplate) : -1;
+        const existing = currentTemplates.find(x => x.id === template.id);
+        const index = existing ? currentTemplates.indexOf(existing) : -1;
 
         if (index > -1) {
             currentTemplates[index] = template;
@@ -49,9 +48,9 @@ export class TestTemplateStorageUtility {
     public static deleteTestTemplate(id: string, storageObj?: Storage): boolean {
         if (id.length == 0) return false;
 
-        let existingTemplate = this.findTestTemplate(id, storageObj);
         const currentTemplates: testTemplate[] = this.getTestTemplates(storageObj);
-        const index = existingTemplate ? currentTemplates.indexOf(existingTemplate) : -1;
+        const existing = currentTemplates.find(x => x.id === id);
+        const index = existing ? currentTemplates.indexOf(existing) : -1;
 
         if (index > -1) {
             currentTemplates.splice(index, 1);

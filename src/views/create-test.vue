@@ -2,7 +2,6 @@
 import TestTemplateList from "../components/templates/test-template-list.vue";
 import type {Ref} from "vue";
 import {onMounted, ref} from "vue";
-import {TestTemplate} from "../models/test-template.ts";
 import {spellingQuestion} from "../models/spelling/spellingQuestion.ts";
 
 const currentTests: Ref<TestTemplate[]> = ref([]);

@@ -1,8 +1,8 @@
-import {testUtilities} from "../../../classes/test-classes/test-util.ts";
-import {spellingQuestion} from "../spellingQuestion.ts";
-import {spellingAnswer} from "../spellingAnswer.ts";
-import {spellingTest} from "../spelling-test.ts";
-import {classHelpers} from "../../../classes/class-helper.ts";
+import {testUtilities} from "../classes/test-classes/test-util.ts";
+import {spellingQuestion} from "../models/spelling/spellingQuestion.ts";
+import {spellingAnswer} from "../models/spelling/spellingAnswer.ts";
+import {spellingTest} from "../models/spelling/spelling-test.ts";
+import {classHelpers} from "../classes/class-helper.ts";
 
 export class spellingTestUtilities {
     public static createSpellingQuestion(question?: string): spellingQuestion {
