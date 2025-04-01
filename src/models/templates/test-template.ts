@@ -26,7 +26,7 @@ export default class testTemplate {
     save(): boolean {
         if (!this.isValid()) return false;
 
-        let result: undefined;
+        let result: testTemplate | undefined;
 
         if (TestTemplateStorageUtility.findTestTemplate(this.id, localStorage)) {
             //existing

@@ -7,7 +7,7 @@ import type {appRoute} from "../../models/app-route.ts";
 import {ref} from "vue";
 
 
-const menuItems: ref<[appRoute][]> = ref(applicationRoutes);
+const menuItems = ref<appRoute[]>(applicationRoutes);
 
 function navigateToItem(item: appRoute): void {
   if (!item) return;
