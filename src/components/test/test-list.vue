@@ -3,7 +3,7 @@
 import {onMounted, ref} from "vue";
 import template from "../../models/templates/test-template.ts";
 
-const currentTests: ref<template[]> = ref([]);
+const currentTests: npref<template[]> = ref([]);
 
 onMounted(() => {
   console.log(currentTests);

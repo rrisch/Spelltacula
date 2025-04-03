@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import  featureCardModel from '../models/feature.ts'
 import router from "../router";
+
+//vue consts
 const props = defineProps({
   feature: { type: featureCardModel, required: true }
 });
 
-
+//component functions
  function onActionClick():void {
    if (!props.feature.route) return;
    router.push(props.feature.route)
  }
-
-
-
 </script>
 
 <template>

@@ -16,4 +16,21 @@ export class classHelpers {
             return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
         });
     }
+
+    public static isDeepEqual(objA:any,objB:any):boolean{
+        if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null){
+            return objA === objB;
+        }
+
+        let objAKeys:string[] =Object.keys(objA);
+        let objBKeys:string[] = Object.keys(objB);
+
+        if (objAKeys.length !== objBKeys.length) return false;
+
+        objAKeys.forEach((aKey:string) =>{
+            if (!objB.hasOwnProperty(aKey) || this.isDeepEqual(objA[aKey],objB[aKey])) return false;
+        });
+
+        return true;
+    }
 }
