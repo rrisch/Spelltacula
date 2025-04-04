@@ -53,7 +53,7 @@ function changeCurrentPage(newPageValue: number): void {
     <button @click="changeCurrentPage(currentPage - 1)" :disabled="currentPage <= 1" class="join-item btn btn-square  btn-ghost">
       <font-awesome-icon :icon="['fas','less-than']"></font-awesome-icon>
     </button>
-    <div class="join-item btn">{{currentPage}} of {{_totalPages}}</div>
+    <div  class="join-item btn btn-disabled btn-ghost">{{currentPage}} of {{_totalPages}}</div>
     <button @click="changeCurrentPage(currentPage + 1)" :disabled="currentPage >= _totalPages " class="join-item btn btn-square  btn-ghost">
       <font-awesome-icon :icon="['fas','greater-than']"></font-awesome-icon>
     </button>

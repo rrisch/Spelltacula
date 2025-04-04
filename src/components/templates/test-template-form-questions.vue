@@ -3,12 +3,17 @@ import type {iTestQuestion} from "../../interfaces/itest-question.ts"
 import {computed, onMounted, type PropType, ref, watch} from "vue";
 import {classHelpers} from "../../classes/class-helper.ts";
 import TablePager from "../common/table-pager.vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {questionType} from "../../constants/test-question-type.ts";
 
 //component constants
 const _questions = ref<iTestQuestion[]>();
 const _currentQuestions = ref<iTestQuestion[]>();
-const _questionPageSize = ref<number>(5);  //default the page size to 10
+const _questionPageSize = ref<number>(10);  //default the page size to 10
 const _currentPage = ref<number>(1);
+const _isTableHeaderChecked = ref<boolean>(false);
+const _selectedQuestions = ref<string[]>([]);
+const _selectedQuestion = ref<iTestQuestion | undefined>(undefined);
 
 const _pagedQuestions = computed((): iTestQuestion[] | undefined => getPageQuestions());
 
@@ -40,12 +45,19 @@ watch(props, (newValue) => {
     props.questions.forEach((q) => {
       _questions.value?.push(JSON.parse(JSON.stringify(q)));
     });
-
-    // console.log(_questions.value)
-    // _questions.value.push(JSON.parse(JSON.stringify(newValue.questions)));
-    // console.log(_questions.value);
   }
 });
+
+watch(_isTableHeaderChecked, (newVal) => {
+  _isTableHeaderChecked.value = newVal;
+  _selectedQuestions.value = [];
+
+  if (_isTableHeaderChecked.value) {
+    _questions.value?.forEach((q) => {
+      _selectedQuestions.value.push(q.id);
+    });
+  }
+})
 
 //component functions
 function getPageQuestions(): iTestQuestion[] | undefined {
@@ -58,46 +70,129 @@ function getPageQuestions(): iTestQuestion[] | undefined {
 function onPageChanged(newPage: number): void {
   _currentPage.value = newPage;
 }
+
+function onQuestionSelected(question: iTestQuestion): void {
+  if (!question) return;
+  _selectedQuestion.value = question;
+}
+
+function isQuestionSelected(id: string): boolean {
+  if (!id || id == "") return false;
+
+  return _selectedQuestions.value.find((x) => {
+    return x == id;
+  }) != undefined;
+}
+
+function onQuestionCheckboxClicked(id: string): void {
+  if (!id || id == "") return;
+
+  if (isQuestionSelected(id)) {
+    let idx = _selectedQuestions.value.indexOf((id));
+    if (idx > -1) {
+      _selectedQuestions.value.splice(idx, 1);
+      return;
+    }
+  }
+
+  //just push it (real good)
+  _selectedQuestions.value.push(id);
+
+}
+
+
 </script>
 
 <template>
-  <div class="h-96 overflow-x-auto p-0">
-    <table class="table table-md min-w-full">
+  <div class="p-0 min-h-[92%] max-h-[92%]">
+    <div class="p-1 flex">
+      <div class="min-h-10 max-h-10 flex-grow">{{
+          _selectedQuestions.length == 0 ? '' : `${_selectedQuestions.length} questions selected`
+        }}
+      </div>
+      <button title="Close" v-if="_selectedQuestions.length > 0" class="btn btn-square btn-ghost">
+        <font-awesome-icon class="deleteButton" size="md" :icon="['fas','trash']"></font-awesome-icon>
+      </button>
+    </div>
+    <table class="table xs:table-xs 2xl:table-md table-sm min-w-full flex-1">
       <thead>
       <tr>
-        <th>
-          <input type="checkbox" class="checkbox">
+        <th class="w-[5%]">
+          <input type="checkbox" v-model="_isTableHeaderChecked" class="checkbox checkbox-xs">
         </th>
+        <th class="w-[14%]">Type</th>
         <th>Question</th>
-        <th>Answer</th>
-        <th>Type</th>
+        <th class="w-[30%]">Answer</th>
+        <th class="w-[15%]"></th>
       </tr>
       </thead>
-      <tbody>
-      <tr v-for="question in _pagedQuestions">
-        <th>
-          <label>
-            <input type="checkbox" class="checkbox">
-          </label>
-        </th>
-        <td>
-          {{ question.description }}
-        </td>
-        <td>
-          {{ question.key }}
-        </td>
-        <td>
-          {{ question.questionType }}
-        </td>
-      </tr>
-      </tbody>
     </table>
-  </div>
-  <div class="flex justify-center">
-    <table-pager @page-changed="onPageChanged" :page-size="_questionPageSize" :total="_questions?.length"></table-pager>
+    <div class="overflow-x-auto min-h-[70%] max-h-[70%] ">
+      <table class="table xs:table-xs 2xl:table-md table-sm min-w-full">
+        <tbody>
+        <tr @click="onQuestionSelected(question)" class="hover:bg-base-300 hover:cursor-pointer"
+            v-for="question in _pagedQuestions">
+          <th class="w-[5%]">
+            <label v-if="!_selectedQuestion || _selectedQuestion != question">
+              <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
+                     v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
+              <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
+                     v-if="!isQuestionSelected(question.id)" class="checkbox checkbox-xs">
+            </label>
+            <label v-if="_selectedQuestion && _selectedQuestion == question">
+            </label>
+          </th>
+          <td class="w-[12%]">
+            <span v-if="!_selectedQuestion || _selectedQuestion != question">
+            <font-awesome-icon v-if="question.questionType == questionType.spelling" :icon="['fas', 'spell-check']"
+                               title="Spelling"/>
+            <font-awesome-icon v-if="question.questionType == questionType.math" :icon="['fas', 'calculator']"
+                               title="Math"/>
+            <font-awesome-icon v-if="question.questionType == questionType.multiple" :icon="['fas', 'list-check']"
+                               title="Multiple Choice"/>
+            </span>
+            <select v-model="question.questionType" class="select" v-if="_selectedQuestion && _selectedQuestion == question">
+              <option disabled selected>Pick a type</option>
+              <option :value="questionType.spelling">Spelling</option>
+              <option :value="questionType.math">Math</option>
+              <option :value="questionType.multiple">Multiple Choice</option>
+            </select>
+          </td>
+          <td>
+            <span v-if="!_selectedQuestion || _selectedQuestion != question">{{ question.description }}</span>
+            <input v-if="_selectedQuestion && _selectedQuestion == question" type="text"
+                   v-model="_selectedQuestion.description" class="input ml-0 flex-grow" placeholder="Question">
+          </td>
+          <td class="w-[30%]">
+            <span v-if="!_selectedQuestion || _selectedQuestion != question">{{ question.key }}</span>
+            <input v-if="_selectedQuestion && _selectedQuestion == question" type="text" v-model="_selectedQuestion.key"
+                   class="input ml-0" placeholder="Answer">
+          </td>
+          <td class="w-[15%]">
+            <button v-if="_selectedQuestion && _selectedQuestion == question"  title="Close"  class="btn btn-square btn-ghost">
+              <font-awesome-icon :icon="['fas','xmark']"></font-awesome-icon>
+            </button>
+            <button v-if="_selectedQuestion && _selectedQuestion == question"  title="Close" class="btn btn-square btn-ghost">
+              <font-awesome-icon  :icon="['fas','xmark']"></font-awesome-icon>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-center">
+      <table-pager @page-changed="onPageChanged" :page-size="_questionPageSize"
+                   :total="_questions?.length"></table-pager>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.deleteButton {
+  color: var(--color-secondary);
+}
 
+.deleteButton:hover {
+  color: var(--color-warning);
+}
 </style>

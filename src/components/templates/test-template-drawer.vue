@@ -32,19 +32,30 @@ function showDrawer(template: testTemplate): void {
 </script>
 
 <template>
-  <div class="drawer drawer-end z-50">
+  <div class="drawer drawer-end z-50 ">
     <input id="drawer-checkbox" type="checkbox" ref="_drawerRef" class="drawer-toggle"/>
     <div class="drawer-side">
       <label for="drawer-checkbox" class="drawer-overlay" @click="closeDrawer"></label>
-      <div class="container bg-base-200 text-base-content min-h-full sm:w-full lg:w-[55%]  p-4">
-        <div class="p-4 flex">
-          <div class="h-14 w-14 flex-grow">{{ _template?.title.length == 0 ? 'Create Test' : 'Update Test' }}</div>
+      <div class="container bg-base-200 text-base-content   sm:w-full lg:w-[55%] min-h-full max-h-full  p-0"
+          >
+        <div class="pl-4 pr-4 flex bg-base-300">
+          <div class="h-8 w-8 flex-grow text-lg pt-1 ">
+            {{ _template?.title.length == 0 ? 'Create Test Template' : 'Update Test Template' }}
+          </div>
           <button title="Close" @click.prevent.stop="closeDrawer" class="btn btn-square btn-ghost">
-            <font-awesome-icon size="xl" :icon="['fas','xmark']"></font-awesome-icon>
+            <font-awesome-icon size="lg" :icon="['fas','xmark']"></font-awesome-icon>
           </button>
         </div>
-        <div class="container">
-        <test-template-form ref="_testTemplateForm"></test-template-form>
+        <div class="pl-4 pr-4 flex">
+          <div class="min-h-10 flex-grow">
+          </div>
+          <button class="btn btn-primary btn-xs md:btn-sm lg:btn-md btn-ghost ">
+            <font-awesome-icon size="md" :icon="['fas','save']"></font-awesome-icon>
+            Save
+          </button>
+        </div>
+        <div  class="pl-2 pr-2 ">
+          <test-template-form ref="_testTemplateForm"></test-template-form>
         </div>
       </div>
     </div>
