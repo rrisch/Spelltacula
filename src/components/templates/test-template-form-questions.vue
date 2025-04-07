@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type {iTestQuestion} from "../../interfaces/itest-question.ts"
-import {computed, onMounted, type PropType, ref, watch} from "vue";
+import {computed, onMounted, type PropType, reactive, ref, watch} from "vue";
 import {classHelpers} from "../../classes/class-helper.ts";
 import TablePager from "../common/table-pager.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
@@ -13,9 +13,11 @@ const _questionPageSize = ref<number>(10);  //default the page size to 10
 const _currentPage = ref<number>(1);
 const _isTableHeaderChecked = ref<boolean>(false);
 const _selectedQuestions = ref<string[]>([]);
-const _selectedQuestion = ref<iTestQuestion | undefined>(undefined);
+const _shadowSelectedQuestion = ref<iTestQuestion | undefined>(undefined);
 
+const _currentQuestionId = reactive({id: "0"});
 const _pagedQuestions = computed((): iTestQuestion[] | undefined => getPageQuestions());
+
 
 //vue const/functions
 const props = defineProps({
@@ -59,6 +61,7 @@ watch(_isTableHeaderChecked, (newVal) => {
   }
 })
 
+
 //component functions
 function getPageQuestions(): iTestQuestion[] | undefined {
   let startIdx = _currentPage.value > 1 ? (_currentPage.value * _questionPageSize.value) - _questionPageSize.value : 0;
@@ -73,7 +76,9 @@ function onPageChanged(newPage: number): void {
 
 function onQuestionSelected(question: iTestQuestion): void {
   if (!question) return;
-  _selectedQuestion.value = question;
+
+  _currentQuestionId.id = question.id;
+  _shadowSelectedQuestion.value = JSON.parse(JSON.stringify(question));
 }
 
 function isQuestionSelected(id: string): boolean {
@@ -97,10 +102,21 @@ function onQuestionCheckboxClicked(id: string): void {
 
   //just push it (real good)
   _selectedQuestions.value.push(id);
-
 }
 
+function onEditCancel(question: iTestQuestion): void {
+  _currentQuestionId.id = "0";
 
+  if (!question) return;
+
+question = JSON.parse(JSON.stringify(_shadowSelectedQuestion.value));
+
+  console.log(question);
+  _shadowSelectedQuestion.value = undefined;
+}
+function onSaveClick():void{
+  _currentQuestionId.id="0";
+}
 </script>
 
 <template>
@@ -133,17 +149,17 @@ function onQuestionCheckboxClicked(id: string): void {
         <tr @click="onQuestionSelected(question)" class="hover:bg-base-300 hover:cursor-pointer"
             v-for="question in _pagedQuestions">
           <th class="w-[5%]">
-            <label v-if="!_selectedQuestion || _selectedQuestion != question">
+            <label v-if="_currentQuestionId.id == question.id">
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="!isQuestionSelected(question.id)" class="checkbox checkbox-xs">
             </label>
-            <label v-if="_selectedQuestion && _selectedQuestion == question">
+            <label v-if="_currentQuestionId.id  == question.id">
             </label>
           </th>
           <td class="w-[12%]">
-            <span v-if="!_selectedQuestion || _selectedQuestion != question">
+            <span v-if="_currentQuestionId.id  != question.id">
             <font-awesome-icon v-if="question.questionType == questionType.spelling" :icon="['fas', 'spell-check']"
                                title="Spelling"/>
             <font-awesome-icon v-if="question.questionType == questionType.math" :icon="['fas', 'calculator']"
@@ -151,7 +167,9 @@ function onQuestionCheckboxClicked(id: string): void {
             <font-awesome-icon v-if="question.questionType == questionType.multiple" :icon="['fas', 'list-check']"
                                title="Multiple Choice"/>
             </span>
-            <select v-model="question.questionType" class="select" v-if="_selectedQuestion && _selectedQuestion == question">
+
+            <select v-model="question.questionType" class="select"
+                    v-if="_currentQuestionId.id == question.id">
               <option disabled selected>Pick a type</option>
               <option :value="questionType.spelling">Spelling</option>
               <option :value="questionType.math">Math</option>
@@ -159,21 +177,25 @@ function onQuestionCheckboxClicked(id: string): void {
             </select>
           </td>
           <td>
-            <span v-if="!_selectedQuestion || _selectedQuestion != question">{{ question.description }}</span>
-            <input v-if="_selectedQuestion && _selectedQuestion == question" type="text"
-                   v-model="_selectedQuestion.description" class="input ml-0 flex-grow" placeholder="Question">
+            <span v-if="_currentQuestionId.id != question.id">{{ question.description }}</span>
+            <input v-if="_currentQuestionId.id == question.id" type="text"
+                   v-model="question.description" class="input ml-0 flex-grow" placeholder="Question">
           </td>
           <td class="w-[30%]">
-            <span v-if="!_selectedQuestion || _selectedQuestion != question">{{ question.key }}</span>
-            <input v-if="_selectedQuestion && _selectedQuestion == question" type="text" v-model="_selectedQuestion.key"
+            <span v-if="_currentQuestionId.id != question.id">{{ question.key }}</span>
+            <input v-if="_currentQuestionId.id == question.id" type="text"
+                   v-model="question.key"
                    class="input ml-0" placeholder="Answer">
           </td>
           <td class="w-[15%]">
-            <button v-if="_selectedQuestion && _selectedQuestion == question"  title="Close"  class="btn btn-square btn-ghost">
-              <font-awesome-icon :icon="['fas','xmark']"></font-awesome-icon>
+            <button v-if="_currentQuestionId.id  == question.id" title="Close" @click.prevent.stop="onSaveClick(question)"
+                    class="btn btn-square btn-ghost">
+              <font-awesome-icon :icon="['fas','check']"></font-awesome-icon>
             </button>
-            <button v-if="_selectedQuestion && _selectedQuestion == question"  title="Close" class="btn btn-square btn-ghost">
-              <font-awesome-icon  :icon="['fas','xmark']"></font-awesome-icon>
+            <button v-if=" _currentQuestionId.id  == question.id" title="Close" @click.prevent.stop="onEditCancel(question)"
+                    class="btn btn-square btn-ghost">
+              <font-awesome-icon title="Cancel"
+                                 :icon="['fas','xmark']"></font-awesome-icon>
             </button>
           </td>
         </tr>
