@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import type {iTestQuestion} from "../../interfaces/itest-question.ts"
-import {computed, onMounted, type PropType, reactive, ref, watch} from "vue";
+import {computed, onMounted, type PropType, ref, watch} from "vue";
 import {classHelpers} from "../../classes/class-helper.ts";
 import TablePager from "../common/table-pager.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {questionType} from "../../constants/test-question-type.ts";
 import {spellingQuestion} from "../../models/spelling/spellingQuestion.ts";
+import ConfirmDialog from "../common/confirm-dialog.vue";
 
 //component constants
+const _pagerComponent = ref<InstanceType<typeof TablePager> | null>(null);
+const _confirmationDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 const _questions = ref<iTestQuestion[]>();
 const _currentQuestions = ref<iTestQuestion[]>();
 const _questionPageSize = ref<number>(10);  //default the page size to 10
@@ -15,7 +18,7 @@ const _currentPage = ref<number>(1);
 const _isTableHeaderChecked = ref<boolean>(false);
 const _selectedQuestions = ref<string[]>([]);
 const _shadowSelectedQuestion = ref<iTestQuestion | undefined>(undefined);
-const _editQuestion = ref({id: "", key: "", description: "", questionType: 1});
+const _editQuestion = ref({id: "", key: "", description: "", questionType: 1, isNew: false});
 const _pagedQuestions = computed((): iTestQuestion[] | undefined => getPageQuestions());
 
 //vue const/functions
@@ -80,7 +83,8 @@ function onQuestionSelected(question: iTestQuestion): void {
     id: question.id,
     key: question.key,
     description: question.description,
-    questionType: question.questionType
+    questionType: question.questionType,
+    isNew: false
   };
 }
 
@@ -108,15 +112,26 @@ function onQuestionCheckboxClicked(id: string): void {
 }
 
 function onEditCancel(question: iTestQuestion): void {
-  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
-
   if (!question) return;
+
+  if (_editQuestion.value && _editQuestion.value.isNew) {
+    _questions.value?.splice(_questions.value?.indexOf((question), 1));
+
+    setTimeout(() => {
+      if (_pagerComponent && _pagerComponent.value) {
+        let currentStatus = _pagerComponent.value?.getCurrentState();
+
+        _pagerComponent.value.changeCurrentPage(currentStatus.total,true);
+
+      }
+    }, 50);
+  }
+  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1, isNew: false};
 
   question.key = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value.key : question.key;
   question.questionType = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value?.questionType : question.questionType;
   question.description = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value.description : question.description;
 
-  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
   _shadowSelectedQuestion.value = undefined;
 }
 
@@ -127,14 +142,36 @@ function onSaveClick(question: iTestQuestion): void {
   question.description = _editQuestion.value.description;
   question.questionType = _editQuestion.value?.questionType;
 
-  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
+  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1, isNew: false};
   _shadowSelectedQuestion.value = undefined;
 }
-function onAddQuestion():void{
-  let newQuestion = new spellingQuestion("","");
-  _editQuestion.value = {id: newQuestion.id,key: newQuestion.key,description: newQuestion.description,questionType: newQuestion.questionType);
 
-    _currentQuestions.value < _
+function onAddQuestion(): void {
+  let newQuestion = new spellingQuestion("", "");
+  _questions.value?.push(newQuestion);
+
+  setTimeout(() => {
+    if (_pagerComponent && _pagerComponent.value) {
+      let currentStatus = _pagerComponent.value?.getCurrentState();
+      if (currentStatus.current < currentStatus.total) {
+        _pagerComponent.value.changeCurrentPage(currentStatus.total,true);
+      }
+    }
+  }, 50);
+
+  _editQuestion.value = {
+    id: newQuestion.id,
+    key: newQuestion.key,
+    description: newQuestion.description,
+    questionType: newQuestion.questionType,
+    isNew: true
+  };
+}
+
+function onDeleteQuestion():void{
+if(_confirmationDialog && _confirmationDialog.value){
+  _confirmationDialog.value.show();
+}
 }
 </script>
 
@@ -145,10 +182,11 @@ function onAddQuestion():void{
           _selectedQuestions.length == 0 ? '' : `${_selectedQuestions.length} questions selected`
         }}
       </div>
-      <button title="Add"  class="btn btn-square btn-ghost">
-        <font-awesome-icon class="addButton" size="md" :icon="['fas','plus']"></font-awesome-icon>
+      <button title="Add" v-if="_selectedQuestions.length == 0" class="btn btn-square btn-ghost">
+        <font-awesome-icon @click="onAddQuestion" class="addButton" size="md"
+                           :icon="['fas','plus']"></font-awesome-icon>
       </button>
-      <button title="Close" v-if="_selectedQuestions.length > 0" class="btn btn-square btn-ghost">
+      <button @click="onDeleteQuestion" title="Close" v-if="_selectedQuestions.length > 0" class="btn btn-square btn-ghost">
         <font-awesome-icon class="deleteButton" size="md" :icon="['fas','trash']"></font-awesome-icon>
       </button>
     </div>
@@ -171,7 +209,7 @@ function onAddQuestion():void{
         <tr @click="onQuestionSelected(question)" class="hover:bg-base-300 hover:cursor-pointer"
             v-for="question in _pagedQuestions">
           <th class="w-[5%]">
-            <label v-if="_editQuestion.id == question.id">
+            <label>
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
@@ -227,9 +265,10 @@ function onAddQuestion():void{
       </table>
     </div>
     <div class="flex justify-center">
-      <table-pager @page-changed="onPageChanged" :page-size="_questionPageSize"
+      <table-pager ref="_pagerComponent" @page-changed="onPageChanged" :page-size="_questionPageSize"
                    :total="_questions?.length"></table-pager>
     </div>
+    <confirm-dialog ref="_confirmationDialog" :is-warning="true" text="Are you Sure"></confirm-dialog>
   </div>
 </template>
 
@@ -237,12 +276,12 @@ function onAddQuestion():void{
 .deleteButton {
   color: var(--color-secondary);
 }
-
-.add-question {
-  color: var(--color-success);
-}
-
 .deleteButton:hover {
   color: var(--color-warning);
 }
+.addButton {
+  color: var(--color-success);
+}
+
+
 </style>

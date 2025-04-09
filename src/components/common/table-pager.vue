@@ -10,6 +10,9 @@ const props = defineProps({
   total: {type: Number, required: true}
 });
 
+//exposed functions
+defineExpose({getCurrentState,changeCurrentPage});
+
 //component const
 const currentPage = ref<number>(1);
 const totalRecords = ref<number>(0);
@@ -36,11 +39,15 @@ watch(props, (newVal) => {
 });
 
 //component events
-function changeCurrentPage(newPageValue: number): void {
-  if (newPageValue === currentPage.value || newPageValue < 1 || newPageValue > _totalPages.value) return;
+function changeCurrentPage(newPageValue: number,force?:boolean): void {
+  if (!force && (newPageValue === currentPage.value || newPageValue < 1 || newPageValue > _totalPages.value)) return;
 
   currentPage.value = newPageValue;
   emit('pageChanged',currentPage.value);
+}
+
+function getCurrentState():{current:number, total:number}{
+  return {current:currentPage.value,total:_totalPages.value};
 }
 
 </script>

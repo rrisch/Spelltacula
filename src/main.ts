@@ -18,10 +18,12 @@ import {
     faCalculator,
     faListCheck,
     faCheck,
-    faPlus
+    faPlus,
+    faWarning,
+    faQuestion
 } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faTrash, faSave, faPlay, faPencil, faXmark, faLessThan, faGreaterThan, faAnglesLeft, faAnglesRight, faSpellCheck, faCalculator, faListCheck, faCheck, faPlus);
+library.add(faTrash, faSave, faPlay, faPencil, faXmark, faLessThan, faGreaterThan, faAnglesLeft, faAnglesRight, faSpellCheck, faCalculator, faListCheck, faCheck, faPlus,faWarning,faQuestion);
 const app = createApp(App);
 app.use(router);
 app.component('font-awesome-icon', FontAwesomeIcon)
