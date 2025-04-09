@@ -5,6 +5,7 @@ import {classHelpers} from "../../classes/class-helper.ts";
 import TablePager from "../common/table-pager.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {questionType} from "../../constants/test-question-type.ts";
+import {spellingQuestion} from "../../models/spelling/spellingQuestion.ts";
 
 //component constants
 const _questions = ref<iTestQuestion[]>();
@@ -14,10 +15,8 @@ const _currentPage = ref<number>(1);
 const _isTableHeaderChecked = ref<boolean>(false);
 const _selectedQuestions = ref<string[]>([]);
 const _shadowSelectedQuestion = ref<iTestQuestion | undefined>(undefined);
-
-const _currentQuestionId = reactive({id: "0"});
+const _editQuestion = ref({id: "", key: "", description: "", questionType: 1});
 const _pagedQuestions = computed((): iTestQuestion[] | undefined => getPageQuestions());
-
 
 //vue const/functions
 const props = defineProps({
@@ -61,7 +60,6 @@ watch(_isTableHeaderChecked, (newVal) => {
   }
 })
 
-
 //component functions
 function getPageQuestions(): iTestQuestion[] | undefined {
   let startIdx = _currentPage.value > 1 ? (_currentPage.value * _questionPageSize.value) - _questionPageSize.value : 0;
@@ -77,8 +75,13 @@ function onPageChanged(newPage: number): void {
 function onQuestionSelected(question: iTestQuestion): void {
   if (!question) return;
 
-  _currentQuestionId.id = question.id;
   _shadowSelectedQuestion.value = JSON.parse(JSON.stringify(question));
+  _editQuestion.value = {
+    id: question.id,
+    key: question.key,
+    description: question.description,
+    questionType: question.questionType
+  };
 }
 
 function isQuestionSelected(id: string): boolean {
@@ -105,17 +108,33 @@ function onQuestionCheckboxClicked(id: string): void {
 }
 
 function onEditCancel(question: iTestQuestion): void {
-  _currentQuestionId.id = "0";
+  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
 
   if (!question) return;
 
-question = JSON.parse(JSON.stringify(_shadowSelectedQuestion.value));
+  question.key = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value.key : question.key;
+  question.questionType = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value?.questionType : question.questionType;
+  question.description = _shadowSelectedQuestion.value ? _shadowSelectedQuestion.value.description : question.description;
 
-  console.log(question);
+  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
   _shadowSelectedQuestion.value = undefined;
 }
-function onSaveClick():void{
-  _currentQuestionId.id="0";
+
+function onSaveClick(question: iTestQuestion): void {
+  if (!question) return;
+
+  question.key = _editQuestion.value.key;
+  question.description = _editQuestion.value.description;
+  question.questionType = _editQuestion.value?.questionType;
+
+  _editQuestion.value = {id: "0", key: "", description: "", questionType: 1};
+  _shadowSelectedQuestion.value = undefined;
+}
+function onAddQuestion():void{
+  let newQuestion = new spellingQuestion("","");
+  _editQuestion.value = {id: newQuestion.id,key: newQuestion.key,description: newQuestion.description,questionType: newQuestion.questionType);
+
+    _currentQuestions.value < _
 }
 </script>
 
@@ -126,6 +145,9 @@ function onSaveClick():void{
           _selectedQuestions.length == 0 ? '' : `${_selectedQuestions.length} questions selected`
         }}
       </div>
+      <button title="Add"  class="btn btn-square btn-ghost">
+        <font-awesome-icon class="addButton" size="md" :icon="['fas','plus']"></font-awesome-icon>
+      </button>
       <button title="Close" v-if="_selectedQuestions.length > 0" class="btn btn-square btn-ghost">
         <font-awesome-icon class="deleteButton" size="md" :icon="['fas','trash']"></font-awesome-icon>
       </button>
@@ -149,17 +171,17 @@ function onSaveClick():void{
         <tr @click="onQuestionSelected(question)" class="hover:bg-base-300 hover:cursor-pointer"
             v-for="question in _pagedQuestions">
           <th class="w-[5%]">
-            <label v-if="_currentQuestionId.id == question.id">
+            <label v-if="_editQuestion.id == question.id">
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="!isQuestionSelected(question.id)" class="checkbox checkbox-xs">
             </label>
-            <label v-if="_currentQuestionId.id  == question.id">
+            <label v-if="_editQuestion.id  == question.id">
             </label>
           </th>
           <td class="w-[12%]">
-            <span v-if="_currentQuestionId.id  != question.id">
+            <span v-if="_editQuestion.id  != question.id">
             <font-awesome-icon v-if="question.questionType == questionType.spelling" :icon="['fas', 'spell-check']"
                                title="Spelling"/>
             <font-awesome-icon v-if="question.questionType == questionType.math" :icon="['fas', 'calculator']"
@@ -168,8 +190,8 @@ function onSaveClick():void{
                                title="Multiple Choice"/>
             </span>
 
-            <select v-model="question.questionType" class="select"
-                    v-if="_currentQuestionId.id == question.id">
+            <select @click.stop.prevent v-model="_editQuestion.questionType" class="select"
+                    v-if="_editQuestion.id == question.id">
               <option disabled selected>Pick a type</option>
               <option :value="questionType.spelling">Spelling</option>
               <option :value="questionType.math">Math</option>
@@ -177,22 +199,24 @@ function onSaveClick():void{
             </select>
           </td>
           <td>
-            <span v-if="_currentQuestionId.id != question.id">{{ question.description }}</span>
-            <input v-if="_currentQuestionId.id == question.id" type="text"
-                   v-model="question.description" class="input ml-0 flex-grow" placeholder="Question">
+            <span v-if="_editQuestion.id != question.id">{{ question.description }}</span>
+            <input @click.stop.prevent v-if="_editQuestion.id == question.id" type="text"
+                   v-model="_editQuestion.description" class="input ml-0 flex-grow" placeholder="Question">
           </td>
           <td class="w-[30%]">
-            <span v-if="_currentQuestionId.id != question.id">{{ question.key }}</span>
-            <input v-if="_currentQuestionId.id == question.id" type="text"
-                   v-model="question.key"
+            <span v-if="_editQuestion.id != question.id">{{ question.key }}</span>
+            <input @click.stop.prevent v-if="_editQuestion.id == question.id" type="text"
+                   v-model="_editQuestion.key"
                    class="input ml-0" placeholder="Answer">
           </td>
           <td class="w-[15%]">
-            <button v-if="_currentQuestionId.id  == question.id" title="Close" @click.prevent.stop="onSaveClick(question)"
+            <button v-if="_editQuestion.id  == question.id" title="Close"
+                    @click.prevent.stop="onSaveClick(question)"
                     class="btn btn-square btn-ghost">
               <font-awesome-icon :icon="['fas','check']"></font-awesome-icon>
             </button>
-            <button v-if=" _currentQuestionId.id  == question.id" title="Close" @click.prevent.stop="onEditCancel(question)"
+            <button v-if=" _editQuestion.id  == question.id" title="Close"
+                    @click.prevent.stop="onEditCancel(question)"
                     class="btn btn-square btn-ghost">
               <font-awesome-icon title="Cancel"
                                  :icon="['fas','xmark']"></font-awesome-icon>
@@ -212,6 +236,10 @@ function onSaveClick():void{
 <style scoped>
 .deleteButton {
   color: var(--color-secondary);
+}
+
+.add-question {
+  color: var(--color-success);
 }
 
 .deleteButton:hover {
