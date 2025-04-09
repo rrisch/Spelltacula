@@ -4,45 +4,50 @@ import {classHelpers} from "../../classes/class-helper.ts";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 
-
 //component conts
 const _id = ref<string>();
 const _modal = ref<HTMLDialogElement | undefined>(undefined);
 
 //vue consts
 const props = defineProps({
+  title: {type: String, required: true},
   text: {type: String, required: true},
-  isWarning:{type:Boolean, required:false}
+  isWarning: {type: Boolean, required: false}
 });
 
 //exposed methods
-defineExpose({show,close});
+defineExpose({show, close});
 
-onMounted(()=>{
+onMounted(() => {
   //generate a unique id for this instance
   _id.value = classHelpers.generateUUID();
 })
-function show():void{
+
+function show(): void {
   if (_modal && _modal.value) _modal.value.showModal();
 }
-function close():void{
+
+function close(): void {
   if (_modal && _modal.value) _modal.value.close();
 }
 
 </script>
 
 <template>
-  <dialog ref="_modal" class="modal" :id="_id" >
+  <dialog ref="_modal" class="modal" :id="_id">
     <div class="modal-box">
+      <div class="flex">
+        <font-awesome-icon size="2xl" class="pr-4 text-warning" :icon="['fas','warning']"></font-awesome-icon>
+        <h3 :class="props.isWarning ? 'text-warning' : 'text-bold'" class="text-lg pr-4">{{ props.title }}!</h3>
+      </div>
 
-      <font-awesome-icon size="md" :icon="['fas','warning']"></font-awesome-icon>
-      <h3 :class="props.isWarning ? 'text-warning' : 'text-bold'" class="text-lg">Hello!</h3>
       <p class="py-4">{{ props.text }}</p>
       <div class="modal-action">
-        <form method="dialog">
-          <!-- if there is a button in form, it will close the modal -->
-          <button class="btn">Close</button>
-        </form>
+        <div class=" flex flex-grow">
+          <div class="flex-grow" @click="close"><button class="btn">Cancel</button></div>
+
+          <div class="flex-none"><button class="btn btn-warning">Confirm</button></div>
+        </div>
       </div>
     </div>
   </dialog>

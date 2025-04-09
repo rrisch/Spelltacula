@@ -268,7 +268,7 @@ if(_confirmationDialog && _confirmationDialog.value){
       <table-pager ref="_pagerComponent" @page-changed="onPageChanged" :page-size="_questionPageSize"
                    :total="_questions?.length"></table-pager>
     </div>
-    <confirm-dialog ref="_confirmationDialog" :is-warning="true" text="Are you Sure"></confirm-dialog>
+    <confirm-dialog ref="_confirmationDialog" title="Confirm Delete" :is-warning="true" :text="`Please confirm you want to delete ${_selectedQuestions.length} questions`"></confirm-dialog>
   </div>
 </template>
 
