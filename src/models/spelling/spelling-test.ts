@@ -2,16 +2,21 @@ import type {iTest} from "../../interfaces/itest.ts";
 import type {iTestAnswer} from "../../interfaces/itest-answer.ts";
 import type {iTestQuestion} from "../../interfaces/itest-question.ts";
 import {spellingAnswer} from "./spellingAnswer.ts";
+import {classHelpers} from "../../classes/class-helper.ts";
 
 export class spellingTest implements iTest {
-    endDate: Date = new Date();
+    endDate: Date | undefined = undefined;
     id: string;
+    title: string;
+    description: string;
     score: number = 0;
-    startDate: Date = new Date();
+    startDate: Date | undefined = undefined;
     testItems: iTestAnswer[];
 
-    constructor(id: string) {
-        this.id = id;
+    constructor(id?: string, title?: string, description?: string) {
+        this.id = id ? id : classHelpers.generateUUID();
+        this.title = title ? title : "";
+        this.description = description ? description : "";
         this.testItems = [];
     }
 
@@ -26,7 +31,7 @@ export class spellingTest implements iTest {
     }
 
     gradeTest(): number {
-        this.score =(this.testItems.filter((i: iTestAnswer) => i.isCorrect()).length / this.testItems.length) * 100;
+        this.score = (this.testItems.filter((i: iTestAnswer) => i.isCorrect()).length / this.testItems.length) * 100;
         return this.score;
     }
 

@@ -2,13 +2,15 @@
 import TestTemplateList from "../components/templates/test-template-list.vue";
 import testTemplate from "../models/templates/test-template.ts"
 import {onMounted, ref} from "vue";
-import {spellingQuestion} from "../models/spelling/spellingQuestion.ts";
 import TestTemplateDrawer from "../components/templates/test-template-drawer.vue";
+import {browserStorageKeys} from "../constants/browser-storage-keys.ts";
+import {safeJsonParse} from "../classes/safeJSONParser.ts";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 //private props
 const currentTests = ref<testTemplate[]>([]);
-const selectedTestTemplate=ref<testTemplate | undefined>(undefined);
-const _templateEdit =  ref<InstanceType<typeof TestTemplateDrawer> | null>(null);
+const selectedTestTemplate = ref<testTemplate | undefined>(undefined);
+const _templateEdit = ref<InstanceType<typeof TestTemplateDrawer> | null>(null);
 
 //vue
 onMounted(() => {
@@ -18,39 +20,56 @@ onMounted(() => {
 
 function loadTestTemplates(): testTemplate[] {
   //fake data until I can pull latest with localstorage provider
-  let tests = [];
-  for (let i = 0; i < 10; i++) {
-    let test = new testTemplate(`Test ${i + 1}`,`Description ${i + 1}`,i % 2 == 0);
 
-    if (test.isCaseSensitive) {
-      for (let x = 0; x < 20; x++) {
-        test.questions.push(new spellingQuestion(`key ${x +1}`, `Description ${x +1}`));
-      }
-    } else {
-      for (let y = 0; y < 10; y++) {
-        test.questions.push(new spellingQuestion(`key ${y+1}`, `Description ${y+1}`));
-      }
-    }
-    tests.push(test);
-  }
-  return tests;
+  let tests = localStorage.getItem(browserStorageKeys.templateKey);
+  if (!tests) return [];
+
+  let result = safeJsonParse<testTemplate[]>(tests);
+  return result ? result : [];
 }
 
-function showEditDrawer(template:testTemplate):void{
- // if (!template) return;
-  selectedTestTemplate.value=template;
-_templateEdit.value?.showDrawer(selectedTestTemplate.value);
+function showEditDrawer(template: testTemplate): void {
+  // if (!template) return;
+  selectedTestTemplate.value = template;
+  _templateEdit.value?.showDrawer(selectedTestTemplate.value);
 }
 
+function addNewTest(): void {
+  let newTest = new testTemplate("", "");
+  _templateEdit.value?.showDrawer(newTest);
+}
+
+function onSaved(): void {
+  currentTests.value = loadTestTemplates();
+}
+
+function onDeleted(): void {
+  currentTests.value = loadTestTemplates();
+}
 </script>
 
 <template>
   <div class="container mx-auto px-4">
-  <test-template-list @edit="showEditDrawer" :tests="currentTests"></test-template-list>
-    <test-template-drawer ref="_templateEdit" :template="selectedTestTemplate" ></test-template-drawer>
+    <div class="p-1 flex">
+      <div class="min-h-10 max-h-10 flex-grow">{{
+
+        }}
+      </div>
+
+      <button title="Create New"
+              class="btn btn-square btn-ghost addButton"
+              @click="addNewTest">
+        <font-awesome-icon size="lg" :icon="['fas','plus']"></font-awesome-icon>
+      </button>
+    </div>
+    <test-template-list :show-edit="true" @edit="showEditDrawer" :tests="currentTests"></test-template-list>
+    <test-template-drawer @deleted="onDeleted" @saved="onSaved" ref="_templateEdit"
+                          :template="selectedTestTemplate"></test-template-drawer>
   </div>
 </template>
 
 <style scoped>
-
+.addButton {
+  color: var(--color-success);
+}
 </style>

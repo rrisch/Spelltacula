@@ -33,6 +33,9 @@ const props = defineProps({
   questionPageSize: {type: Number, required: false}
 });
 
+defineExpose({getCurrentQuestionValue})
+
+
 onMounted(() => {
   if (!props.questions || props.questions.length == 0) return;
   _currentQuestions.value = props.questions;
@@ -43,7 +46,6 @@ onMounted(() => {
   props.questions.forEach((q) => {
     _questions.value?.push(JSON.parse(JSON.stringify(q)));
   })
-
 });
 
 watch(props, (newValue) => {
@@ -71,6 +73,10 @@ watch(_isTableHeaderChecked, (newVal) => {
 })
 
 //component functions
+function getCurrentQuestionValue(): iTestQuestion[] {
+  return _questions && _questions.value ? _questions.value : [];
+}
+
 function getPageQuestions(): iTestQuestion[] | undefined {
   let startIdx = _currentPage.value > 1 ? (_currentPage.value * _questionPageSize.value) - _questionPageSize.value : 0;
   let endIdx = startIdx + _questionPageSize.value;
@@ -187,6 +193,7 @@ async function onDeleteQuestion(): Promise<void> {
           }
 
         })
+
         _refreshCount.value++;
         _selectedQuestions.value = [];
         _isTableHeaderChecked.value = false;
@@ -236,6 +243,7 @@ async function onDeleteQuestion(): Promise<void> {
             <label>
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
+              <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="!isQuestionSelected(question.id)" class="checkbox checkbox-xs">
             </label>
             <label v-if="_editQuestion.id  == question.id">
