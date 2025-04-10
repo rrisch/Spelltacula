@@ -9,6 +9,7 @@ import {spellingQuestion} from "../../models/spelling/spellingQuestion.ts";
 import ConfirmDialog from "../common/confirm-dialog.vue";
 
 //component constants
+const _refreshCount = ref<number>(0);
 const _pagerComponent = ref<InstanceType<typeof TablePager> | null>(null);
 const _confirmationDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 const _questions = ref<iTestQuestion[]>();
@@ -19,7 +20,12 @@ const _isTableHeaderChecked = ref<boolean>(false);
 const _selectedQuestions = ref<string[]>([]);
 const _shadowSelectedQuestion = ref<iTestQuestion | undefined>(undefined);
 const _editQuestion = ref({id: "", key: "", description: "", questionType: 1, isNew: false});
+
 const _pagedQuestions = computed((): iTestQuestion[] | undefined => getPageQuestions());
+const _total = computed((): number => {
+  _refreshCount.value;
+  return _questions && _questions.value ? _questions.value.length : 0
+});
 
 //vue const/functions
 const props = defineProps({
@@ -37,6 +43,7 @@ onMounted(() => {
   props.questions.forEach((q) => {
     _questions.value?.push(JSON.parse(JSON.stringify(q)));
   })
+
 });
 
 watch(props, (newValue) => {
@@ -121,7 +128,7 @@ function onEditCancel(question: iTestQuestion): void {
       if (_pagerComponent && _pagerComponent.value) {
         let currentStatus = _pagerComponent.value?.getCurrentState();
 
-        _pagerComponent.value.changeCurrentPage(currentStatus.total,true);
+        _pagerComponent.value.changeCurrentPage(currentStatus.total, true);
 
       }
     }, 50);
@@ -154,7 +161,7 @@ function onAddQuestion(): void {
     if (_pagerComponent && _pagerComponent.value) {
       let currentStatus = _pagerComponent.value?.getCurrentState();
       if (currentStatus.current < currentStatus.total) {
-        _pagerComponent.value.changeCurrentPage(currentStatus.total,true);
+        _pagerComponent.value.changeCurrentPage(currentStatus.total, true);
       }
     }
   }, 50);
@@ -168,10 +175,26 @@ function onAddQuestion(): void {
   };
 }
 
-function onDeleteQuestion():void{
-if(_confirmationDialog && _confirmationDialog.value){
-  _confirmationDialog.value.show();
-}
+async function onDeleteQuestion(): Promise<void> {
+  if (_confirmationDialog && _confirmationDialog.value) {
+    await _confirmationDialog.value.confirm().then((result: boolean) => {
+      if (result && _selectedQuestions.value.length > 0) {
+        _selectedQuestions.value.forEach((q) => {
+          let idx = _questions.value?.find(x => x.id === q);
+
+          if (idx && _questions.value && _questions.value?.indexOf(idx) > -1) {
+            _questions.value?.splice(_questions.value?.indexOf(idx), 1);
+          }
+
+        })
+        _refreshCount.value++;
+        _selectedQuestions.value = [];
+        _isTableHeaderChecked.value = false;
+      }
+    }).catch(error => {
+      console.log(error);
+    });
+  }
 }
 </script>
 
@@ -183,11 +206,12 @@ if(_confirmationDialog && _confirmationDialog.value){
         }}
       </div>
       <button title="Add" v-if="_selectedQuestions.length == 0" class="btn btn-square btn-ghost">
-        <font-awesome-icon @click="onAddQuestion" class="addButton" size="md"
+        <font-awesome-icon @click="onAddQuestion" class="addButton"
                            :icon="['fas','plus']"></font-awesome-icon>
       </button>
-      <button @click="onDeleteQuestion" title="Close" v-if="_selectedQuestions.length > 0" class="btn btn-square btn-ghost">
-        <font-awesome-icon class="deleteButton" size="md" :icon="['fas','trash']"></font-awesome-icon>
+      <button @click="onDeleteQuestion" title="Close" v-if="_selectedQuestions.length > 0"
+              class="btn btn-square btn-ghost">
+        <font-awesome-icon class="deleteButton" :icon="['fas','trash']"></font-awesome-icon>
       </button>
     </div>
     <table class="table xs:table-xs 2xl:table-md table-sm min-w-full flex-1">
@@ -206,19 +230,18 @@ if(_confirmationDialog && _confirmationDialog.value){
     <div class="overflow-x-auto min-h-[70%] max-h-[70%] ">
       <table class="table xs:table-xs 2xl:table-md table-sm min-w-full">
         <tbody>
-        <tr @click="onQuestionSelected(question)" class="hover:bg-base-300 hover:cursor-pointer"
+        <tr class="hover:bg-base-300 hover:cursor-pointer"
             v-for="question in _pagedQuestions">
           <th class="w-[5%]">
             <label>
               <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="isQuestionSelected(question.id)" checked="checked" class="checkbox checkbox-xs">
-              <input type="checkbox" @click.prevent.stop="onQuestionCheckboxClicked(question.id)"
                      v-if="!isQuestionSelected(question.id)" class="checkbox checkbox-xs">
             </label>
             <label v-if="_editQuestion.id  == question.id">
             </label>
           </th>
-          <td class="w-[12%]">
+          <td @click="onQuestionSelected(question)" class="w-[12%]">
             <span v-if="_editQuestion.id  != question.id">
             <font-awesome-icon v-if="question.questionType == questionType.spelling" :icon="['fas', 'spell-check']"
                                title="Spelling"/>
@@ -236,12 +259,12 @@ if(_confirmationDialog && _confirmationDialog.value){
               <option :value="questionType.multiple">Multiple Choice</option>
             </select>
           </td>
-          <td>
+          <td @click="onQuestionSelected(question)">
             <span v-if="_editQuestion.id != question.id">{{ question.description }}</span>
             <input @click.stop.prevent v-if="_editQuestion.id == question.id" type="text"
                    v-model="_editQuestion.description" class="input ml-0 flex-grow" placeholder="Question">
           </td>
-          <td class="w-[30%]">
+          <td @click="onQuestionSelected(question)" class="w-[30%]">
             <span v-if="_editQuestion.id != question.id">{{ question.key }}</span>
             <input @click.stop.prevent v-if="_editQuestion.id == question.id" type="text"
                    v-model="_editQuestion.key"
@@ -266,9 +289,10 @@ if(_confirmationDialog && _confirmationDialog.value){
     </div>
     <div class="flex justify-center">
       <table-pager ref="_pagerComponent" @page-changed="onPageChanged" :page-size="_questionPageSize"
-                   :total="_questions?.length"></table-pager>
+                   :total="_total"></table-pager>
     </div>
-    <confirm-dialog ref="_confirmationDialog" title="Confirm Delete" :is-warning="true" :text="`Please confirm you want to delete ${_selectedQuestions.length} questions`"></confirm-dialog>
+    <confirm-dialog ref="_confirmationDialog" title="Confirm Delete" :is-warning="true"
+                    :text="`Please confirm you want to delete ${_selectedQuestions.length} questions`"></confirm-dialog>
   </div>
 </template>
 
@@ -276,9 +300,11 @@ if(_confirmationDialog && _confirmationDialog.value){
 .deleteButton {
   color: var(--color-secondary);
 }
+
 .deleteButton:hover {
   color: var(--color-warning);
 }
+
 .addButton {
   color: var(--color-success);
 }

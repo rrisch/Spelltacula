@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {computed, onMounted, ref, watch} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import type {iTestQuestion} from "../../interfaces/itest-question.ts";
 
 //vue const
 const emit = defineEmits<{(event: 'pageChanged', pageNumber: number): void}>();
@@ -18,7 +17,7 @@ const currentPage = ref<number>(1);
 const totalRecords = ref<number>(0);
 const recordsPerPage = ref<number>(10);  //10 as fallback
 
-const _totalPages = computed((): number =>  Math.ceil(totalRecords.value / recordsPerPage.value));
+const _totalPages = computed((): number => totalRecords.value == 0 ? 1 : Math.ceil(totalRecords.value / recordsPerPage.value));
 
 //vue events
 onMounted(() => {
@@ -30,12 +29,11 @@ onMounted(() => {
 });
 
 watch(props, (newVal) => {
-  if (!newVal.total) return;
-  if (!newVal.pageSize) return;
-
-  currentPage.value = 1;
-  totalRecords.value = newVal.total;
-  recordsPerPage.value = newVal.pageSize;
+  if (newVal && newVal.total != totalRecords.value) {
+    totalRecords.value = newVal.total;
+    if (_totalPages.value < currentPage.value) currentPage.value = _totalPages.value;
+  }
+  if (newVal && newVal.pageSize != recordsPerPage.value) recordsPerPage.value = newVal.pageSize;
 });
 
 //component events

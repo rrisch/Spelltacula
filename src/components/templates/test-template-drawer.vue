@@ -50,7 +50,6 @@ function showDrawer(template: testTemplate): void {
           <div class="min-h-10 flex-grow">
           </div>
           <button class="btn btn-primary btn-xs md:btn-sm lg:btn-md btn-ghost ">
-            <font-awesome-icon size="md" :icon="['fas','save']"></font-awesome-icon>
             Save
           </button>
         </div>
