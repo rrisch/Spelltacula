@@ -8,7 +8,8 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 const _alertStore = ref(useAlertStore());
 
 function getAlertClass(typeAlert: alertType): string {
-  let alertClass = '';
+  let alertClass: string;
+
   switch (typeAlert) {
     case alertType.Success:
       alertClass = 'alert-success';
