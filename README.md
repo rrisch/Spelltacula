@@ -7,6 +7,7 @@ This is just a fun project for me to try out some new frameworks and keep my ski
 This project utilizes the following
 - Vue 3 / Typescript / Vite
 - Vue Router
+- Pinia for state management
 - Tailwind CSS / daisyUI
 - Vue FontAwesome icons
 
