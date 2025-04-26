@@ -19,8 +19,6 @@ onMounted(() => {
 })
 
 function loadTestTemplates(): testTemplate[] {
-  //fake data until I can pull latest with localstorage provider
-
   let tests = localStorage.getItem(browserStorageKeys.templateKey);
   if (!tests) return [];
 
